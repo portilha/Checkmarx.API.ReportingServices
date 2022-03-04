@@ -11,6 +11,16 @@ using System.Threading;
 
 namespace Checkmarx.API.ReportingServices
 {
+
+    enum TemplateType :int
+    {
+        ScanTemplateVulnerabilityTypeOriented =1 ,
+        ScanTemplateResultStateOriented = 2,
+        ProjectTemplate = 3,
+        SingleTeamTemplate = 4, 
+        MultiTeamsTemplate = 5
+    }
+
     public class ReportingServiceClient
     {
         private Uri _acUrl;
@@ -114,7 +124,7 @@ namespace Checkmarx.API.ReportingServices
                 EntityId = new string[] { projectId.ToString() },
                 OutputFormat = format,
                 ReportName = reportName,
-                TemplateId = 3
+                TemplateId = (int)TemplateType.ProjectTemplate
             }, format);
         }
 
@@ -136,7 +146,7 @@ namespace Checkmarx.API.ReportingServices
                 EntityId = teamsFullName,
                 OutputFormat = format,
                 ReportName = reportName,
-                TemplateId = teamsFullName.Count() > 1 ? 5 : 4
+                TemplateId = teamsFullName.Count() > 1 ? (int)TemplateType.MultiTeamsTemplate : (int)TemplateType.SingleTeamTemplate
             }, format);
         }
 
@@ -153,7 +163,7 @@ namespace Checkmarx.API.ReportingServices
                 EntityId = new string[] { scanId.ToString() },
                 OutputFormat = format,
                 ReportName = reportName,
-                TemplateId = 1
+                TemplateId = (int) TemplateType.ScanTemplateVulnerabilityTypeOriented
             }, format);
         }
 

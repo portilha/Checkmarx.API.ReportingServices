@@ -15,6 +15,7 @@
 
 namespace Checkmarx.API.ReportingServices
 {
+    using System.Diagnostics;
     using System = global::System;
 
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.15.10.0 (NJsonSchema v10.6.10.0 (Newtonsoft.Json v12.0.0.0))")]
@@ -185,6 +186,10 @@ namespace Checkmarx.API.ReportingServices
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
+#if DEBUG
+                    Trace.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(body, _settings.Value));
+#endif
+
                     var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(body, _settings.Value));
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
