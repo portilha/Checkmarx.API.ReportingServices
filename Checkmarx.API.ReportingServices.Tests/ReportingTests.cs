@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 
 namespace Checkmarx.API.ReportingServices.Tests
@@ -10,6 +12,9 @@ namespace Checkmarx.API.ReportingServices.Tests
     public class ReportingTests
     {
         private static ReportingServiceClient _client;
+
+
+        private static CxClient _sastClient;
 
         public static IConfigurationRoot Configuration { get; private set; }
 
@@ -22,7 +27,16 @@ namespace Checkmarx.API.ReportingServices.Tests
 
             Configuration = builder.Build();
 
-            _client = new ReportingServiceClient(Configuration["Server"], Configuration["AcServer"], Configuration["Username"], Configuration["Password"]);
+            _client = new ReportingServiceClient(Configuration["Server"], Configuration["SastServer"], Configuration["Username"], Configuration["Password"]);
+
+            _sastClient = new CxClient(new Uri(Configuration["SastServer"]), Configuration["Username"], Configuration["Password"]);
+        }
+
+
+        [TestMethod]
+        public void SASTConnectionTest()
+        {
+            Assert.IsTrue(_sastClient.Connected);
         }
 
         [TestMethod]
@@ -42,7 +56,19 @@ namespace Checkmarx.API.ReportingServices.Tests
         [TestMethod]
         public void CreateScanReportTest()
         {
-            string fileName = _client.GetScanReport(234, "test");
+            var project = _sastClient.GetProjects().First();
+
+            Trace.WriteLine($"{project.Key} {project.Value}");
+
+            var scan = _sastClient.GetLastScan(project.Key);
+
+            Assert.IsNotNull(scan);
+
+            Trace.WriteLine(scan.Id);
+
+            string fileName = _client.GetScanReport(scan.Id, project.Value);
+
+            Trace.WriteLine(fileName);
 
             Assert.IsNotNull(fileName);
         }
@@ -58,7 +84,9 @@ namespace Checkmarx.API.ReportingServices.Tests
         [TestMethod]
         public void CreateTeamReportTest()
         {
-            string fileName = _client.GetTeamReport(null, format:"pdf", "CxServer/SP");
+            var team = _sastClient.AC.TeamsAllAsync().Result.First();
+
+            string fileName = _client.GetTeamReport(null, format:"pdf", team.FullName);
         }
     }
 }

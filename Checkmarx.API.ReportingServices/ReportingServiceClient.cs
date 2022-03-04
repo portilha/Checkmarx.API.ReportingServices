@@ -148,7 +148,6 @@ namespace Checkmarx.API.ReportingServices
             if (string.IsNullOrWhiteSpace(reportName))
                 throw new ArgumentNullException(nameof(reportName));
 
-
             return getReport(new CreateReportDTO
             {
                 EntityId = new string[] { scanId.ToString() },
@@ -165,15 +164,20 @@ namespace Checkmarx.API.ReportingServices
             if (format != "pdf" && format != "json")
                 throw new ArgumentOutOfRangeException("The format can only be json or pdf");
 
-            var createreport = this.ReportingService.CreateReportAsync(report).Result;
-
-
-            while (ReportingService.ReportStatusAsync(createreport.ReportId).Result.ReportStatus == "Processing")
+            var createReport = this.ReportingService.CreateReportAsync(report).Result;
+            var statys = ReportingService.ReportStatusAsync(createReport.ReportId).Result;
+            while (statys.ReportStatus == "Processing")
             {
                 Thread.Sleep(System.TimeSpan.FromSeconds(2));
+                statys = ReportingService.ReportStatusAsync(createReport.ReportId).Result;
             }
 
-            var result = ReportingService.ReportsGETAsync(createreport.ReportId).Result;
+            Console.WriteLine(statys.ReportStatus);
+
+            if (statys.ReportStatus == "Failed")
+                throw new ApplicationException(statys.Message);
+
+            var result = ReportingService.ReportsGETAsync(createReport.ReportId).Result;
 
             string fileName = report.ReportName + "." + format;
 

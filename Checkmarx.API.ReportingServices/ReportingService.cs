@@ -487,12 +487,12 @@ namespace Checkmarx.API.ReportingServices
         public string ReportName { get; set; }
 
         [Newtonsoft.Json.JsonProperty("filters", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.ICollection<FilterDTO> Filters { get; set; }
+        public System.Collections.Generic.ICollection<FilterDTO> Filters { get; set; } = new FilterDTO[] { };
 
         [Newtonsoft.Json.JsonProperty("outputFormat", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         [System.ComponentModel.DataAnnotations.RegularExpression(@"PDF|JSON|pdf|json|Pdf|Json")]
-        public string OutputFormat { get; set; }
+        public string OutputFormat { get; set; } = "pdf";
 
     }
 
