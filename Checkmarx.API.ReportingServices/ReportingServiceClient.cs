@@ -32,6 +32,12 @@ namespace Checkmarx.API.ReportingServices
         private readonly HttpClient _httpClient = new HttpClient();
         private readonly HttpClient _acHttpClient = new HttpClient();
 
+
+        /// <summary>
+        /// Pooling interval in seconds for the conclusion of the report
+        /// </summary>
+        public int PoolingInterval { get; set; } = 2;
+
         private DateTime _bearerValidTo;
 
 
@@ -119,7 +125,7 @@ namespace Checkmarx.API.ReportingServices
             if (string.IsNullOrWhiteSpace(reportName))
                 throw new ArgumentNullException(nameof(reportName));
 
-            return getReport(new CreateReportDTO
+            return getReportFile(new CreateReportDTO
             {
                 EntityId = new string[] { projectId.ToString() },
                 OutputFormat = format,
@@ -141,9 +147,15 @@ namespace Checkmarx.API.ReportingServices
                     reportName = "MultipleTeams";
             }
 
-            return getReport(new CreateReportDTO
+            return getReportFile(new CreateReportDTO
             {
                 EntityId = teamsFullName,
+                //Filters = new FilterDTO[] {
+                //    new FilterDTO
+                //    {
+                        
+                //    }
+                //},
                 OutputFormat = format,
                 ReportName = reportName,
                 TemplateId = teamsFullName.Count() > 1 ? (int)TemplateType.MultiTeamsTemplate : (int)TemplateType.SingleTeamTemplate
@@ -158,7 +170,7 @@ namespace Checkmarx.API.ReportingServices
             if (string.IsNullOrWhiteSpace(reportName))
                 throw new ArgumentNullException(nameof(reportName));
 
-            return getReport(new CreateReportDTO
+            return getReportFile(new CreateReportDTO
             {
                 EntityId = new string[] { scanId.ToString() },
                 OutputFormat = format,
@@ -167,7 +179,21 @@ namespace Checkmarx.API.ReportingServices
             }, format);
         }
 
-        private string getReport(CreateReportDTO report, string format)
+        private string getReportFile(CreateReportDTO report, string format)
+        {
+            var result = getReportStream(report, format);
+
+            string fileName = report.ReportName + "." + format;
+
+            using (FileStream fs = File.Create(fileName))
+            {
+                result.Stream.CopyTo(fs);
+            }
+
+            return Path.GetFullPath(fileName);
+        }
+
+        private FileResponse getReportStream(CreateReportDTO report, string format)
         {
             format = format?.ToLowerInvariant().Trim();
 
@@ -178,7 +204,7 @@ namespace Checkmarx.API.ReportingServices
             var statys = ReportingService.ReportStatusAsync(createReport.ReportId).Result;
             while (statys.ReportStatus == "Processing")
             {
-                Thread.Sleep(System.TimeSpan.FromSeconds(2));
+                Thread.Sleep(System.TimeSpan.FromSeconds(TimeInterval));
                 statys = ReportingService.ReportStatusAsync(createReport.ReportId).Result;
             }
 
@@ -187,16 +213,7 @@ namespace Checkmarx.API.ReportingServices
             if (statys.ReportStatus == "Failed")
                 throw new ApplicationException(statys.Message);
 
-            var result = ReportingService.ReportsGETAsync(createReport.ReportId).Result;
-
-            string fileName = report.ReportName + "." + format;
-
-            using (FileStream fs = File.Create(fileName))
-            {
-                result.Stream.CopyTo(fs);
-            }
-
-            return Path.GetFullPath(fileName);
+            return ReportingService.ReportsGETAsync(createReport.ReportId).Result;
         }
     }
 }

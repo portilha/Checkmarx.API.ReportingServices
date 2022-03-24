@@ -50,7 +50,12 @@ namespace Checkmarx.API.ReportingServices.Tests
         ///   "templateId": 1, Unique ID of a specific Template. Possible Values: 1 for Scan Template Vulnerability Type oriented; 2 for Scan Template Result State oriented; 3 for Project Template; 4 for Single Team Template; 5 for Multi Teams Template
         //"entityId": 100003, Unique ID.For the scan templates it is the Scan Id; for the project template it is the Project Id; for the teams templates it is the Team full name
         //"reportName": "Report Name", Name of the report to be generated.The service generates automatically a report Id that will be concatenated with the specified report name
-        //"filters": [], Filters to be applied in the report creation.Both reports accept as filters: Severity, Result State and Status, which are build based on excludedValues. Severity: If not defined, Low and Informative results are excluded by default. Result State: If not defined, none is excluded by default. Status: If not defined, Resolved is excluded by default. Specific Fiters for Scan Template: Query: Build based on excludedValues. If not defined none is excluded by default. Results Limit: Build based on includedValues, 5000 is the default limit.Specific Filters for Project Template: Timeframe: based on includedValues.To define a date range composed by a starting and an ending date.Data point: based on includedValues.By default last is used as data point. Allowed values are last or first. Specific Fiters for Teams Templates: Project Name: Build based on excludedValues. If not defined none is excluded by default. Project Custom Fields: Build based on includedValues. If not defined no project is excluded by default. Specific Fiters for Multi Teams Template: Team Name: Build based on excludedValues. If not defined none is excluded by default.
+        //"filters": [], Filters to be applied in the report creation.
+        //Both reports accept as filters:
+        //Severity, Result State and Status, which are build based on excludedValues. Severity: If not defined, Low and Informative results are excluded by default. Result State: If not defined, none is excluded by default.
+        //Status: If not defined, Resolved is excluded by default. Specific Fiters for Scan Template: Query: Build based on excludedValues. If not defined none is excluded by default. Results Limit: Build based on includedValues, 5000 is the default limit.Specific Filters for Project Template: Timeframe: based on includedValues.To define a date range composed by a starting and an ending date.Data point: based on includedValues.By default last is used as data point. Allowed values are last or first.
+        //Specific Fiters for Teams Templates: Project Name: Build based on excludedValues. If not defined none is excluded by default. Project Custom Fields: Build based on includedValues. If not defined no project is excluded by default.
+        //Specific Fiters for Multi Teams Template: Team Name: Build based on excludedValues. If not defined none is excluded by default.
         //"outputFormat": "PDF" Format of the report to be generated.Is not case sensitive.
         /// </summary>
         [TestMethod]
@@ -66,32 +71,40 @@ namespace Checkmarx.API.ReportingServices.Tests
 
             Trace.WriteLine(scan.Id);
 
-            string fileName = _client.GetScanReport(scan.Id, project.Value);
+            string fileName = _client.GetScanReport(scan.Id, project.Value + "_" + scan.Id);
 
             Trace.WriteLine(fileName);
 
             Assert.IsNotNull(fileName);
         }
 
+
+        [TestMethod]
+        public void MyTestMethod()
+        {
+            string fileName = _client.GetProjectReport(2, "test", "json");
+
+            Trace.WriteLine(fileName);
+        }
+
         [TestMethod]
         public void CreateProjectReportTest()
         {
-            var projects = _sastClient.GetProjects();
-            foreach (var project in projects)
+            var project = _sastClient.GetProjects().First();
+
+            try
             {
-                try
-                {
-                    string fileName = _client.GetProjectReport(project.Key, project.Value, "json");
+                string fileName = _client.GetProjectReport(project.Key, project.Value, "pdf");
 
-                    Trace.WriteLine(fileName);
+                Trace.WriteLine(fileName);
 
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    Trace.WriteLine(project.Value + "  " + ex.Message);
-                }
+                return;
             }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(project.Value + "  " + ex.Message);
+            }
+
         }
 
         [TestMethod]
@@ -100,6 +113,14 @@ namespace Checkmarx.API.ReportingServices.Tests
             var team = _sastClient.AC.TeamsAllAsync().Result.First();
 
             string fileName = _client.GetTeamReport(null, format: "pdf", team.FullName);
+        }
+
+        [TestMethod]
+        public void CreateMultipleTeamReportTest()
+        {
+            var teams = _sastClient.AC.TeamsAllAsync().Result.Take(10);
+
+            string fileName = _client.GetTeamReport(null, format: "pdf", teams.Select(x => x.FullName).ToArray());
         }
     }
 }
