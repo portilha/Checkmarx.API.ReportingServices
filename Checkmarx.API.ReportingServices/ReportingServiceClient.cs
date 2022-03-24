@@ -204,7 +204,7 @@ namespace Checkmarx.API.ReportingServices
             var statys = ReportingService.ReportStatusAsync(createReport.ReportId).Result;
             while (statys.ReportStatus == "Processing")
             {
-                Thread.Sleep(System.TimeSpan.FromSeconds(TimeInterval));
+                Thread.Sleep(System.TimeSpan.FromSeconds(PoolingInterval));
                 statys = ReportingService.ReportStatusAsync(createReport.ReportId).Result;
             }
 
