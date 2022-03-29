@@ -21,6 +21,40 @@ namespace Checkmarx.API.ReportingServices
         MultiTeamsTemplate = 5
     }
 
+    
+
+    public enum FilterType : int
+    {
+        // Excluding results having severity = Information and Low.
+        // "excludedValues": ["Information", "Low"] - 
+        Severity = 1,
+        // Not Exploitable Result state will be excluded.
+        // "excludedValues": ["Not Exploitable"]
+        ResultState = 2,
+        // Excluding SQL Injection
+        // "excludedValues": [ "SQL_Injection" ]
+        Query = 3,
+        //  Setting timeframe with included values between January 1 and November16.
+        //  "includedValues": ["2021-01-01","2021-11-16" ] 
+        TimeFrame = 4,
+        // Excluding New findings
+        // "excludedValues": [ "New" ] 
+        ResultStatus = 5,
+        // Including the Limit Results to be printed in Scan Results section to 100
+        // "includedValues": [ "100" ]
+        // default 5000, 
+        NumberOfResults = 6, 
+        //  Setting data point as first
+        //  "includedValues": ["first"]
+        DataPointOrder = 7,
+        // Include or exclude based on Project Name
+        // "excludedValues": ["BookStoreJava"]
+        Projects = 8,
+        // Include or exclude based on custom field
+        // "includedValues": ["Version","1"]
+        CustomFields = 9
+    }
+
     public class ReportingServiceClient
     {
         private Uri _acUrl;
@@ -153,7 +187,8 @@ namespace Checkmarx.API.ReportingServices
                 //Filters = new FilterDTO[] {
                 //    new FilterDTO
                 //    {
-
+                //        Type = (int)FilterType.Severity,
+                        
                 //    }
                 //},
                 OutputFormat = format,
