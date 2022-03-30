@@ -11,7 +11,9 @@ using System.Threading;
 
 namespace Checkmarx.API.ReportingServices
 {
-
+    /// <summary>
+    /// Based on the documentation of https://checkmarx.atlassian.net/wiki/spaces/RS/pages/5860130923/APIs
+    /// </summary>
     public class ReportingServiceClient
     {
         private Uri _acUrl;
