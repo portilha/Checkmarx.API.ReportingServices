@@ -138,7 +138,8 @@ namespace Checkmarx.API.ReportingServices
                     reportName = teamsFullName.Single().Split("/").Last();
                 else
                     reportName = "MultipleTeams";
-            }
+            } 
+
 
             return getReportFile(new CreateReportDTO
             {
