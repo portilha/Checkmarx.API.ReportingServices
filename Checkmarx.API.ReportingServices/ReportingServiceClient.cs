@@ -11,16 +11,9 @@ using System.Threading;
 
 namespace Checkmarx.API.ReportingServices
 {
-
-    enum TemplateType :int
-    {
-        ScanTemplateVulnerabilityTypeOriented =1 ,
-        ScanTemplateResultStateOriented = 2,
-        ProjectTemplate = 3,
-        SingleTeamTemplate = 4, 
-        MultiTeamsTemplate = 5
-    }
-
+    /// <summary>
+    /// Based on the documentation of https://checkmarx.atlassian.net/wiki/spaces/RS/pages/5860130923/APIs
+    /// </summary>
     public class ReportingServiceClient
     {
         private Uri _acUrl;
@@ -145,7 +138,8 @@ namespace Checkmarx.API.ReportingServices
                     reportName = teamsFullName.Single().Split("/").Last();
                 else
                     reportName = "MultipleTeams";
-            }
+            } 
+
 
             return getReportFile(new CreateReportDTO
             {
@@ -153,6 +147,7 @@ namespace Checkmarx.API.ReportingServices
                 //Filters = new FilterDTO[] {
                 //    new FilterDTO
                 //    {
+                //        Type = (int)FilterType.Severity,
                         
                 //    }
                 //},
@@ -181,6 +176,39 @@ namespace Checkmarx.API.ReportingServices
                 TemplateId = (int)TemplateType.ScanTemplateVulnerabilityTypeOriented
             }, format);
         }
+
+        public Stream GetScanReportVulnerabilityTypeOriented(long scanId, string reportName, string format = "pdf")
+        {
+            return GetScanReportStream(scanId, reportName, format, TemplateType.ScanTemplateVulnerabilityTypeOriented);
+        }
+
+        public Stream GetScanReportResultStateOriented(long scanId, string reportName, string format = "pdf")
+        {
+            return GetScanReportStream(scanId, reportName, format, TemplateType.ScanTemplateResultStateOriented);
+        }
+
+        private Stream GetScanReportStream(long scanId, string reportName, string format = "pdf",
+            TemplateType templateType = TemplateType.ScanTemplateVulnerabilityTypeOriented)
+        {
+            if (scanId < 0)
+                throw new ArgumentNullException(nameof(scanId));
+
+            if (string.IsNullOrWhiteSpace(reportName))
+                throw new ArgumentNullException(nameof(reportName));
+
+            if (templateType != TemplateType.ScanTemplateVulnerabilityTypeOriented &&
+                templateType != TemplateType.ScanTemplateResultStateOriented)
+                throw new ArgumentOutOfRangeException("The Scan report only support result state and vulnerability oriented report.");
+
+            return getReportStream(new CreateReportDTO
+            {
+                EntityId = new string[] { scanId.ToString() },
+                OutputFormat = format,
+                ReportName = reportName,
+                TemplateId = (int)templateType
+            }, format).Stream;
+        }
+
 
         private string getReportFile(CreateReportDTO report, string format)
         {
