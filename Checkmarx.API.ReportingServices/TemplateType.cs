@@ -1,6 +1,6 @@
 ﻿namespace Checkmarx.API.ReportingServices
 {
-    enum TemplateType : int
+    public enum TemplateType : int
     {
         ScanTemplateVulnerabilityTypeOriented = 1,
         ScanTemplateResultStateOriented = 2,

@@ -138,7 +138,7 @@ namespace Checkmarx.API.ReportingServices
                     reportName = teamsFullName.Single().Split("/").Last();
                 else
                     reportName = "MultipleTeams";
-            } 
+            }
 
 
             return getReportFile(new CreateReportDTO
@@ -148,7 +148,7 @@ namespace Checkmarx.API.ReportingServices
                 //    new FilterDTO
                 //    {
                 //        Type = (int)FilterType.Severity,
-                        
+
                 //    }
                 //},
                 OutputFormat = format,
@@ -157,7 +157,7 @@ namespace Checkmarx.API.ReportingServices
             }, format);
         }
 
-        public string GetScanReport(long scanId, string reportName, string format = "pdf", params FilterDTO[] filters)
+        public string GetScanReport(long scanId, string reportName, TemplateType scanType = TemplateType.ScanTemplateVulnerabilityTypeOriented, string format = "pdf", params FilterDTO[] filters)
         {
             if (scanId < 0)
                 throw new ArgumentNullException(nameof(scanId));
@@ -173,22 +173,22 @@ namespace Checkmarx.API.ReportingServices
                 OutputFormat = format,
                 Filters = finalFilters,
                 ReportName = reportName,
-                TemplateId = (int)TemplateType.ScanTemplateVulnerabilityTypeOriented
+                TemplateId = (int)scanType
             }, format);
         }
 
-        public Stream GetScanReportVulnerabilityTypeOriented(long scanId, string reportName, string format = "pdf")
+        public Stream GetScanReportVulnerabilityTypeOriented(long scanId, string reportName, string format = "pdf", params FilterDTO[] filters)
         {
-            return GetScanReportStream(scanId, reportName, format, TemplateType.ScanTemplateVulnerabilityTypeOriented);
+            return GetScanReportStream(scanId, reportName, format, TemplateType.ScanTemplateVulnerabilityTypeOriented, filters);
         }
 
-        public Stream GetScanReportResultStateOriented(long scanId, string reportName, string format = "pdf")
+        public Stream GetScanReportResultStateOriented(long scanId, string reportName, string format = "pdf", params FilterDTO[] filters)
         {
-            return GetScanReportStream(scanId, reportName, format, TemplateType.ScanTemplateResultStateOriented);
+            return GetScanReportStream(scanId, reportName, format, TemplateType.ScanTemplateResultStateOriented, filters);
         }
 
         private Stream GetScanReportStream(long scanId, string reportName, string format = "pdf",
-            TemplateType templateType = TemplateType.ScanTemplateVulnerabilityTypeOriented)
+            TemplateType templateType = TemplateType.ScanTemplateVulnerabilityTypeOriented, params FilterDTO[] filters)
         {
             if (scanId < 0)
                 throw new ArgumentNullException(nameof(scanId));
@@ -200,12 +200,16 @@ namespace Checkmarx.API.ReportingServices
                 templateType != TemplateType.ScanTemplateResultStateOriented)
                 throw new ArgumentOutOfRangeException("The Scan report only support result state and vulnerability oriented report.");
 
+
+            var finalFilters = filters ?? new FilterDTO[] { };
+
             return getReportStream(new CreateReportDTO
             {
                 EntityId = new string[] { scanId.ToString() },
                 OutputFormat = format,
                 ReportName = reportName,
-                TemplateId = (int)templateType
+                TemplateId = (int)templateType,
+                Filters = finalFilters
             }, format).Stream;
         }
 
