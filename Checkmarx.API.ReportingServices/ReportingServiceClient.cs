@@ -162,7 +162,7 @@ namespace Checkmarx.API.ReportingServices
             }, format);
         }
 
-        public string GetScanReport(long scanId, string reportName, string format = "pdf")
+        public string GetScanReport(long scanId, string reportName, string format = "pdf", params FilterDTO[] filters)
         {
             if (scanId < 0)
                 throw new ArgumentNullException(nameof(scanId));
@@ -170,12 +170,15 @@ namespace Checkmarx.API.ReportingServices
             if (string.IsNullOrWhiteSpace(reportName))
                 throw new ArgumentNullException(nameof(reportName));
 
+            var finalFilters = filters ?? new FilterDTO[] { };
+
             return getReportFile(new CreateReportDTO
             {
                 EntityId = new string[] { scanId.ToString() },
                 OutputFormat = format,
+                Filters = finalFilters,
                 ReportName = reportName,
-                TemplateId = (int) TemplateType.ScanTemplateVulnerabilityTypeOriented
+                TemplateId = (int)TemplateType.ScanTemplateVulnerabilityTypeOriented
             }, format);
         }
 
