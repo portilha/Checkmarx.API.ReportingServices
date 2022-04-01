@@ -71,7 +71,7 @@ namespace Checkmarx.API.ReportingServices.Tests
 
             Trace.WriteLine(scan.Id);
 
-            string fileName = _client.GetScanReport(scan.Id, project.Value + "_" + scan.Id);
+            Stream fileName = _client.GetScanReport(scan.Id, project.Value + "_" + scan.Id);
 
             Trace.WriteLine(fileName);
 
@@ -82,7 +82,7 @@ namespace Checkmarx.API.ReportingServices.Tests
         [TestMethod]
         public void MyTestMethod()
         {
-            string fileName = _client.GetProjectReport(2, "test", "json");
+            Stream fileName = _client.GetProjectReport(2, "test", "json");
 
             Trace.WriteLine(fileName);
         }
@@ -94,7 +94,7 @@ namespace Checkmarx.API.ReportingServices.Tests
 
             try
             {
-                string fileName = _client.GetProjectReport(project.Key, project.Value, "pdf");
+                Stream fileName = _client.GetProjectReport(project.Key, project.Value, "pdf");
 
                 Trace.WriteLine(fileName);
 
@@ -112,7 +112,7 @@ namespace Checkmarx.API.ReportingServices.Tests
         {
             var team = _sastClient.AC.TeamsAllAsync().Result.First();
 
-            string fileName = _client.GetTeamReport(null, format: "pdf", team.FullName);
+            Stream fileName = _client.GetTeamReport(null, format: "pdf", team.FullName);
         }
 
         [TestMethod]
@@ -120,7 +120,7 @@ namespace Checkmarx.API.ReportingServices.Tests
         {
             var teams = _sastClient.AC.TeamsAllAsync().Result.Take(10);
 
-            string fileName = _client.GetTeamReport(null, format: "pdf", teams.Select(x => x.FullName).ToArray());
+                Stream fileName = _client.GetTeamReport(null, format: "pdf", teams.Select(x => x.FullName).ToArray());
         }
     }
 }
