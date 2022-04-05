@@ -112,7 +112,7 @@ namespace Checkmarx.API.ReportingServices.Tests
         {
             var team = _sastClient.AC.TeamsAllAsync().Result.First();
 
-            Stream fileName = _client.GetTeamReport(null, format: "pdf", team.FullName);
+            Stream fileName = _client.GetTeamReport(new[] { team.FullName }, null, format: "pdf");
         }
 
         [TestMethod]
@@ -120,7 +120,7 @@ namespace Checkmarx.API.ReportingServices.Tests
         {
             var teams = _sastClient.AC.TeamsAllAsync().Result.Take(10);
 
-                Stream fileName = _client.GetTeamReport(null, format: "pdf", teams.Select(x => x.FullName).ToArray());
+            Stream fileName = _client.GetTeamReport(teams.Select(x => x.FullName).ToArray(), null, format: "pdf");
         }
     }
 }

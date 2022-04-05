@@ -123,11 +123,38 @@ namespace Checkmarx.API.ReportingServices
                 EntityId = new string[] { projectId.ToString() },
                 OutputFormat = format,
                 ReportName = reportName,
-                TemplateId = (int)TemplateType.ProjectTemplate
+                TemplateId = (int)TemplateType.ProjectTemplate,
+                Filters = filters
             }, format).Stream;
         }
 
-        public Stream GetTeamReport(string reportName = null, string format = "pdf", params string[] teamsFullName)
+        public Stream GetApplicationReport(IEnumerable<long> projectIds, string reportName, string format = "pdf", params FilterDTO[] filters)
+        {
+            if (projectIds == null || projectIds.Count() <= 0)
+                throw new ArgumentNullException(nameof(projectIds));
+
+            if (string.IsNullOrWhiteSpace(reportName))
+                throw new ArgumentNullException(nameof(reportName));
+
+            return getReportStream(new CreateReportDTO
+            {
+                EntityId = projectIds.Select(x => x.ToString()).ToArray(),
+                OutputFormat = format,
+                ReportName = reportName,
+                TemplateId = (int)TemplateType.Application,
+                Filters = filters
+            }, format).Stream;
+        }
+
+        public Stream GetTeamReport(string teamFullName, string reportName = null, string format = "pdf", params FilterDTO[] filters)
+        {
+            if(string.IsNullOrEmpty(teamFullName)) 
+                throw new ArgumentNullException(nameof(teamFullName));
+
+            return GetTeamReport(new string[] { teamFullName }, reportName, format, filters);
+        }
+
+        public Stream GetTeamReport(IEnumerable<string> teamsFullName, string reportName = null, string format = "pdf", params FilterDTO[] filters)
         {
             if (teamsFullName == null || !teamsFullName.Any())
                 throw new ArgumentNullException(nameof(teamsFullName));
@@ -142,13 +169,13 @@ namespace Checkmarx.API.ReportingServices
 
             return getReportStream(new CreateReportDTO
             {
-                EntityId = teamsFullName,
+                EntityId = teamsFullName.ToArray(),
                 OutputFormat = format,
                 ReportName = reportName,
-                TemplateId = teamsFullName.Count() > 1 ? (int)TemplateType.MultiTeamsTemplate : (int)TemplateType.SingleTeamTemplate
+                TemplateId = teamsFullName.Count() > 1 ? (int)TemplateType.MultiTeamsTemplate : (int)TemplateType.SingleTeamTemplate,
+                Filters = filters
             }, format).Stream;
         }
-
 
         public FilterDTO GetDateFilter(DateTime startDateTime) => GetDateFilter(startDateTime, DateTime.Now);
 
@@ -219,7 +246,6 @@ namespace Checkmarx.API.ReportingServices
                 Filters = finalFilters
             }, format).Stream;
         }
-
 
         private string getReportFile(CreateReportDTO report, string format)
         {

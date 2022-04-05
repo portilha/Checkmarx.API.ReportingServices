@@ -6,6 +6,7 @@
         ScanTemplateResultStateOriented = 2,
         ProjectTemplate = 3,
         SingleTeamTemplate = 4,
-        MultiTeamsTemplate = 5
+        MultiTeamsTemplate = 5,
+        Application = 6
     }
 }
