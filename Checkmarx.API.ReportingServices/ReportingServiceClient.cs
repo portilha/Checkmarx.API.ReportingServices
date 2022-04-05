@@ -149,6 +149,21 @@ namespace Checkmarx.API.ReportingServices
             }, format).Stream;
         }
 
+
+        public FilterDTO GetDateFilter(DateTime startDateTime) => GetDateFilter(startDateTime, DateTime.Now);
+
+        public FilterDTO GetDateFilter(DateTime startDateTime, DateTime endDate)
+        {
+            if (startDateTime > endDate)
+                throw new ArgumentOutOfRangeException("The start date is after the end date");
+
+            return new FilterDTO
+            {
+                Type = (int)FilterType.Timeframe,
+                IncludedValues = new[] { startDateTime.ToString("yyyy-MM-dd"), endDate.ToString("yyyy-MM-dd") }
+            };
+        }
+
         public string GetScanReportToFile(long scanId, string reportName, TemplateType scanType = TemplateType.ScanTemplateVulnerabilityTypeOriented, string format = "pdf", params FilterDTO[] filters)
         {
             if (scanId < 0)
