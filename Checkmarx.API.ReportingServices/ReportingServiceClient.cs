@@ -232,18 +232,38 @@ namespace Checkmarx.API.ReportingServices
             }, format).Stream;
         }
 
+        public Stream GetExecutiveReport(IEnumerable<string> teamsFullName = null, string reportName = null, string format = "pdf", params FilterDTO[] filters)
+        {
+            if (teamsFullName == null || !teamsFullName.Any())
+                throw new ArgumentNullException(nameof(teamsFullName));
+
+            if (teamsFullName == null || !teamsFullName.Any())
+            {
+                teamsFullName = AC.TeamsAllAsync().Result.Select(x => x.FullName);
+            }
+
+            return getReportStream(new CreateReportDTO
+            {
+                EntityId = teamsFullName.ToArray(),
+                OutputFormat = format,
+                ReportName = reportName,
+                TemplateId = (int)TemplateType.Executive,
+                Filters = filters
+            }, format).Stream;
+        }
+
         #endregion
 
         #region Report Helpers
 
-        public string GetScanReportToFile(long scanId, string reportName, 
-            TemplateType scanType = TemplateType.ScanTemplateVulnerabilityTypeOriented, 
+        public string GetScanReportToFile(long scanId, string reportName,
+            TemplateType scanType = TemplateType.ScanTemplateVulnerabilityTypeOriented,
             string format = "pdf", params FilterDTO[] filters)
         {
             string fileName = reportName + "." + format;
 
             return SaveReportToFile(
-                GetScanReport(scanId, reportName, format, scanType, filters), 
+                GetScanReport(scanId, reportName, format, scanType, filters),
                 fileName);
         }
 
