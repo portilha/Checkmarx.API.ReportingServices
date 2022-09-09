@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -110,6 +111,27 @@ namespace Checkmarx.API.ReportingServices
             throw new Exception(response.Content.ReadAsStringAsync().Result);
         }
 
+        /// <summary>
+        /// Returns true if the Reporting Services version supports a given version.s
+        /// </summary>
+        /// <param name="version">1,2,....</param>
+        /// <returns>true if the api supports a given version of the REST API, otherwise false.</returns>
+        public bool SupportsRESTAPIVersion(int version)
+        {
+            var uri = new Uri(_baseURL, $"swagger/v{version}/swagger.json");
+
+            using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
+            {
+                HttpResponseMessage response = _httpClient.SendAsync(request).Result;
+                if (response.StatusCode == HttpStatusCode.OK)
+                    return true;
+                else if (response.StatusCode == HttpStatusCode.NotFound)
+                    return false;
+
+                throw new NotSupportedException(response.Content.ReadAsStringAsync().Result);
+            }
+        }
+
         public Stream GetProjectReport(long projectId, string reportName, string format = "pdf", params FilterDTO[] filters)
         {
             if (projectId < 0)
@@ -148,7 +170,7 @@ namespace Checkmarx.API.ReportingServices
 
         public Stream GetTeamReport(string teamFullName, string reportName = null, string format = "pdf", params FilterDTO[] filters)
         {
-            if(string.IsNullOrEmpty(teamFullName)) 
+            if (string.IsNullOrEmpty(teamFullName))
                 throw new ArgumentNullException(nameof(teamFullName));
 
             return GetTeamReport(new string[] { teamFullName }, reportName, format, filters);
@@ -233,7 +255,6 @@ namespace Checkmarx.API.ReportingServices
             if (scanType != TemplateType.ScanTemplateVulnerabilityTypeOriented &&
                 scanType != TemplateType.ScanTemplateResultStateOriented)
                 throw new ArgumentOutOfRangeException("The Scan report only support result state and vulnerability oriented report.");
-
 
             var finalFilters = filters ?? new FilterDTO[] { };
 
