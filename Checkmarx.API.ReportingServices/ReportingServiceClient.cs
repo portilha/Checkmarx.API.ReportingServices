@@ -331,7 +331,9 @@ namespace Checkmarx.API.ReportingServices
                 statys = ReportingService.ReportStatusAsync(createReport.ReportId).Result;
             }
 
-            Console.WriteLine(statys.ReportStatus);
+#if DEBUG
+            Console.WriteLine($"Report Status for Entity {String.Join(";", report.EntityId)}: " + statys.ReportStatus);
+#endif
 
             if (statys.ReportStatus == "Failed")
                 throw new ApplicationException(statys.Message);
