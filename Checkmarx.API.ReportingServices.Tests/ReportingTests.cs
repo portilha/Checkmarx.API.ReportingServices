@@ -1,10 +1,13 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
+using Utilities;
 
 namespace Checkmarx.API.ReportingServices.Tests
 {
@@ -122,5 +125,319 @@ namespace Checkmarx.API.ReportingServices.Tests
 
             Stream fileName = _client.GetTeamReport(teams.Select(x => x.FullName).ToArray(), null, format: "pdf");
         }
+
+
+
+
+
+        private Dictionary<int, string> _stateIdToName;
+        public Dictionary<int, string> StateList
+        {
+            get
+            {
+                if (_stateIdToName == null)
+                {
+                    _stateIdToName = new Dictionary<int, string>();
+
+                    foreach (var item in _sastClient.PortalSOAP.GetResultStateListAsync(null).Result.ResultStateList)
+                    {
+                        _stateIdToName.Add((int)item.ResultID, item.ResultName);
+                    }
+                }
+
+                return _stateIdToName;
+            }
+        }
+
+
+        [TestMethod]
+        public void GetProjectDetails()
+        {
+            var project = _sastClient.GetProjectSettings(2);
+
+            var sastCustomFields = _sastClient.GetSASTCustomFields();
+
+            int asaStatus = sastCustomFields["ASA_Status"];
+            int optimizationDate = sastCustomFields["ASA_Status"];
+
+            foreach (var customField in project.CustomFields)
+            {
+                Trace.WriteLine(customField.Id + " = " + customField.Value);
+            }
+
+            Trace.WriteLine(_sastClient.GetProjectTeamName(project.TeamId));
+        }
+
+        [TestMethod]
+        public void GetJsonReportFromScanTemplateVulnerabilityTypeOrientedForProjectTest()
+        {
+            int projectId = 2;
+
+           
+
+            StringBuilder scansInfo = new StringBuilder("\"" + string.Join("\",\"",
+                "Project Id",
+                "Team",
+                "Scan Id",
+                "Scan Date",
+                "isIncremental",
+                "vulnerabilityType",
+                "queryPath",
+                "Query Name",
+                "hyperlink",
+                "hyperlinkScanId",
+                "hyperlinkPathId",
+                "similarityId",
+                "State",
+                "level",
+                "firstDetection",
+                //"optimizationDate",
+                "resolvedDate",
+                "timeToResolve") + "\"\r\n");
+
+            var queries = _sastClient.GetQueries().SelectMany(x => x.Queries).ToDictionary(x => x.QueryVersionCode);
+
+            foreach (var scan in _sastClient.GetScans(projectId, true))
+            {
+                try
+                {
+                    scansInfo.Append(GetFixedResultsTest(scan, queries));
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine(ex.Message);
+                }
+
+                //string file = _client.GetScanReportToFile(scan.Id, $"{projectId}_{scan.Id}_ScanTemplateVulnerabilityTypeOriented",
+                //    TemplateType.ScanTemplateVulnerabilityTypeOriented, "json",
+                //    new FilterDTO
+                //    {
+                //        Type = 5,
+                //        ExcludedValues = new string[] { }
+                //    });
+                // Trace.WriteLine(file);
+            }
+
+            string file = $"scan_{DateTime.Now.Ticks}.csv";
+
+            File.WriteAllText(file, scansInfo.ToString());
+
+            ProcessUtils.ShowFileInExplorer(file);
+        }
+
+        [TestMethod]
+        public void GetJsonReportFromScanTemplateVulnerabilityTypeOrientedForSingleScanTest()
+        {
+            long scanId = 1001335;
+
+            string file = _client.GetScanReportToFile(scanId, scanId.ToString(), TemplateType.ScanTemplateVulnerabilityTypeOriented, "json",
+                    new FilterDTO
+                    {
+                        Type = (int)FilterType.ResultStatus, // result state
+                        ExcludedValues = new string[] { }
+                    },
+                     new FilterDTO
+                     {
+                         Type = (int)FilterType.Severity, // 
+                         ExcludedValues = new string[] { }
+                     },
+                     new FilterDTO
+                     {
+                         Type = (int)FilterType.ResultState, // 
+                         ExcludedValues = new string[] { }
+                     },
+                     new FilterDTO
+                     {
+                         Type = (int)FilterType.ResultsLimit, // number of vulnerablities
+                         IncludedValues = new string[] { "1000000" }
+                     });
+
+            Trace.WriteLine(file);
+
+            ProcessUtils.ShowFileInExplorer(file);
+        }
+
+        public StringBuilder GetFixedResultsTest(SAST.Scan scan, Dictionary<long, cxPortalWebService93.CxWSQuery> queries)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            var report = _client.GetJsonFromReport(_client.GetScanReportVulnerabilityTypeOriented(scan.Id, scan.Id.ToString(), "json",
+                   new FilterDTO
+                   {
+                       Type = (int)FilterType.ResultStatus, // result state
+                       ExcludedValues = new string[] { }
+                   },
+                    new FilterDTO
+                    {
+                        Type = (int)FilterType.Severity, // 
+                        ExcludedValues = new string[] { }
+                    },
+                    new FilterDTO
+                    {
+                        Type = (int)FilterType.ResultState, // 
+                        ExcludedValues = new string[] { }
+                    },
+                    new FilterDTO
+                    {
+                        Type = (int)FilterType.ResultsLimit, // number of vulnerablities
+                        IncludedValues = new string[] { "1000000" }
+                    }));
+
+            Assert.IsNotNull(report);
+
+            if (report.resolvedVulnerabilities != null)
+            {
+                int total = (int)report.resolvedVulnerabilities.total;
+
+                if (total > 0)
+                {
+                    foreach (var vulnType in report.resolvedVulnerabilities.vulnerabilitiesList)
+                    {
+                        foreach (var result in vulnType.results)
+                        {
+                            foreach (var resolved in result.resolved)
+                            {
+                                Uri hiperlink = (Uri)resolved.hyperlink;
+
+                                string[] hyperlinkParameters = hiperlink.Query.Remove(0, 1).Split("&");
+
+                                long hyperlinkScanId = long.Parse(hyperlinkParameters[0].Split("=")[1]);
+                                int hyperlinkPathId = int.Parse(hyperlinkParameters[2].Split("=")[1]);
+                                var scanResult = GetResult(hyperlinkScanId, hyperlinkPathId);
+
+                                long queryVersion = (long)vulnType.queryVersion;
+
+                                string queryName = $"{queryVersion} found not";
+                                if (queries.ContainsKey(queryVersion))
+                                    queryName = queries[queryVersion].Name;
+
+                                sb.AppendLine(
+                                     String.Join(",",
+                                     scan.Id,
+                                     scan.DateAndTime?.EngineStartedOn,
+                                     scan.IsIncremental,
+                                     (string)vulnType.vulnerabilityType,
+                                     (string)vulnType.queryPath,
+                                     queryName,
+                                     hiperlink.AbsoluteUri,
+                                     hyperlinkScanId,
+                                     hyperlinkPathId,
+                                     scanResult.SimilarityId,
+                                     StateList[scanResult.StateId],
+                                     (string)resolved.level,
+                                     (DateTime)resolved.firstDetection,
+                                     (DateTime)resolved.resolvedDate,
+                                     (int)resolved.timeToResolve
+                                     ));
+                            }
+                        }
+                    }
+                }
+            }
+            return sb;
+        }
+
+        private Dictionary<long, Dictionary<long, CxDataRepository.Result>> _resultsCache = new Dictionary<long, Dictionary<long, CxDataRepository.Result>>();
+
+        private CxDataRepository.Result GetResult(long hyperlinkScanId, int hyperlinkPathId)
+        {
+            Dictionary<long, CxDataRepository.Result> scanResults = null;
+            if (!_resultsCache.ContainsKey(hyperlinkScanId))
+            {
+                scanResults = _sastClient.GetODataResults(hyperlinkScanId).ToDictionary(x => x.PathId);
+                _resultsCache.Add(hyperlinkScanId, scanResults);
+            }
+
+            return _resultsCache[hyperlinkScanId][hyperlinkPathId];
+        }
+
+        [TestMethod]
+        public void GetScanDiffTest()
+        {
+            var fixResults = _sastClient.GetScansDiff(1000006, 1001335)
+                .Where(x => x.ResultStatus == cxPortalWebService93.CompareStatusType.Fixed);
+
+            Trace.WriteLine(fixResults.Count());
+        }
+
+        [TestMethod]
+        public void GetSimilarityIdTest()
+        {
+            foreach (var item in _sastClient.GetODataResults(1000006).Where(x => x.PathId == 1))
+            {
+                Trace.WriteLine("similiarity=" + item.SimilarityId);
+                Trace.WriteLine("scanid=" + item.ScanId);
+                Trace.WriteLine("pathid=" + item.PathId);
+                Trace.WriteLine(item.Comment);
+            }
+        }
+
+
+
+        [TestMethod]
+        public void GetOnboardedPRojectTest()
+        {
+            foreach (var item in _sastClient.GetProjects())
+            {
+                foreach (var cf in _sastClient.GetProjectCustomFields(item.Key))
+                {
+                    if (cf.Value.Value == "Delivered")
+                    {
+                        Trace.WriteLine(item.Key + " " + item.Value);
+                        break;
+                    }
+                }
+            }
+        }
+
+
+        [TestMethod]
+        public void GetScansFromPRojectTest()
+        {
+            foreach (var item in _sastClient.GetScans(2, true))
+            {
+                Trace.WriteLine(item.Id);
+            }
+        }
+
+
+        [TestMethod]
+        public void GetProjectTest()
+        {
+            var st = _client.GetProjectReport(2, "projectreport_2", "pdf");
+
+            string fileName = "testPDF.pdf";
+
+            using (FileStream fs = File.Create(fileName))
+            {
+                st.CopyTo(fs);
+            }
+
+            Trace.WriteLine(Path.GetFullPath(fileName));
+        }
+
+        [TestMethod]
+        public void ValidateRSVersionTest()
+        {
+            Assert.IsTrue(_client.SupportsRESTAPIVersion(2));
+        }
+
+        [TestMethod]
+        public void ValidateRSVersionFailTest()
+        {
+            Assert.IsFalse(_client.SupportsRESTAPIVersion(4));
+        }
+
+
+
+        [TestMethod]
+        public void GetStatechangestest()
+        {
+            var result = _sastClient.PortalSOAP.GetPathCommentsHistoryAsync(string.Empty, 1001357, 11,  cxPortalWebService93.ResultLabelTypeEnum.State).Result;
+
+
+            Assert.IsNotNull(result);
+        }
+
     }
 }

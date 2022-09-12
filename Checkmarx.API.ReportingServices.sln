@@ -3,24 +3,45 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Checkmarx.API.ReportingServices", ".\Checkmarx.API.ReportingServices\Checkmarx.API.ReportingServices.csproj", "{916BE7E8-31F3-4407-87A6-411986C5D7B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Checkmarx.API.ReportingServices", "Checkmarx.API.ReportingServices\Checkmarx.API.ReportingServices.csproj", "{916BE7E8-31F3-4407-87A6-411986C5D7B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Checkmarx.API.ReportingServices.Tests", ".\Checkmarx.API.ReportingServices.Tests\Checkmarx.API.ReportingServices.Tests.csproj", "{8D03187B-E7D4-4992-B567-40A8D21A40D8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Checkmarx.API.ReportingServices.Tests", "Checkmarx.API.ReportingServices.Tests\Checkmarx.API.ReportingServices.Tests.csproj", "{8D03187B-E7D4-4992-B567-40A8D21A40D8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utilities", "..\Utilities\Utilities.csproj", "{98377DB6-D8FD-40AD-A0FF-E7F8C39FF819}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExtractMTTR", "..\..\ExtractMTTR\ExtractMTTR\ExtractMTTR.csproj", "{2A421370-C6AD-44B4-B8AE-3E0B55DE3CFE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Publish|Any CPU = Publish|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{916BE7E8-31F3-4407-87A6-411986C5D7B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{916BE7E8-31F3-4407-87A6-411986C5D7B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{916BE7E8-31F3-4407-87A6-411986C5D7B7}.Publish|Any CPU.ActiveCfg = Release|Any CPU
+		{916BE7E8-31F3-4407-87A6-411986C5D7B7}.Publish|Any CPU.Build.0 = Release|Any CPU
 		{916BE7E8-31F3-4407-87A6-411986C5D7B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{916BE7E8-31F3-4407-87A6-411986C5D7B7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8D03187B-E7D4-4992-B567-40A8D21A40D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8D03187B-E7D4-4992-B567-40A8D21A40D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D03187B-E7D4-4992-B567-40A8D21A40D8}.Publish|Any CPU.ActiveCfg = Release|Any CPU
+		{8D03187B-E7D4-4992-B567-40A8D21A40D8}.Publish|Any CPU.Build.0 = Release|Any CPU
 		{8D03187B-E7D4-4992-B567-40A8D21A40D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D03187B-E7D4-4992-B567-40A8D21A40D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98377DB6-D8FD-40AD-A0FF-E7F8C39FF819}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98377DB6-D8FD-40AD-A0FF-E7F8C39FF819}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98377DB6-D8FD-40AD-A0FF-E7F8C39FF819}.Publish|Any CPU.ActiveCfg = Publish|Any CPU
+		{98377DB6-D8FD-40AD-A0FF-E7F8C39FF819}.Publish|Any CPU.Build.0 = Publish|Any CPU
+		{98377DB6-D8FD-40AD-A0FF-E7F8C39FF819}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98377DB6-D8FD-40AD-A0FF-E7F8C39FF819}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A421370-C6AD-44B4-B8AE-3E0B55DE3CFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A421370-C6AD-44B4-B8AE-3E0B55DE3CFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A421370-C6AD-44B4-B8AE-3E0B55DE3CFE}.Publish|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A421370-C6AD-44B4-B8AE-3E0B55DE3CFE}.Publish|Any CPU.Build.0 = Debug|Any CPU
+		{2A421370-C6AD-44B4-B8AE-3E0B55DE3CFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A421370-C6AD-44B4-B8AE-3E0B55DE3CFE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
