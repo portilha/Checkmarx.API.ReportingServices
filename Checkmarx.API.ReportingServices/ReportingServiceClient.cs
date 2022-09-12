@@ -132,6 +132,8 @@ namespace Checkmarx.API.ReportingServices
             }
         }
 
+        #region Reports
+
         public Stream GetProjectReport(long projectId, string reportName, string format = "pdf", params FilterDTO[] filters)
         {
             if (projectId < 0)
@@ -199,40 +201,6 @@ namespace Checkmarx.API.ReportingServices
             }, format).Stream;
         }
 
-        public FilterDTO GetDateFilter(DateTime startDateTime) => GetDateFilter(startDateTime, DateTime.Now);
-
-        public FilterDTO GetDateFilter(DateTime startDateTime, DateTime endDate)
-        {
-            if (startDateTime > endDate)
-                throw new ArgumentOutOfRangeException("The start date is after the end date");
-
-            return new FilterDTO
-            {
-                Type = (int)FilterType.Timeframe,
-                IncludedValues = new[] { startDateTime.ToString("yyyy-MM-dd"), endDate.ToString("yyyy-MM-dd") }
-            };
-        }
-
-        public string GetScanReportToFile(long scanId, string reportName, TemplateType scanType = TemplateType.ScanTemplateVulnerabilityTypeOriented, string format = "pdf", params FilterDTO[] filters)
-        {
-            if (scanId < 0)
-                throw new ArgumentNullException(nameof(scanId));
-
-            if (string.IsNullOrWhiteSpace(reportName))
-                throw new ArgumentNullException(nameof(reportName));
-
-            var finalFilters = filters ?? new FilterDTO[] { };
-
-            return getReportFile(new CreateReportDTO
-            {
-                EntityId = new string[] { scanId.ToString() },
-                OutputFormat = format,
-                Filters = finalFilters,
-                ReportName = reportName,
-                TemplateId = (int)scanType
-            }, format);
-        }
-
         public Stream GetScanReportVulnerabilityTypeOriented(long scanId, string reportName, string format = "pdf", params FilterDTO[] filters)
         {
             return GetScanReport(scanId, reportName, format, TemplateType.ScanTemplateVulnerabilityTypeOriented, filters);
@@ -268,18 +236,84 @@ namespace Checkmarx.API.ReportingServices
             }, format).Stream;
         }
 
-        private string getReportFile(CreateReportDTO report, string format)
+        public Stream GetExecutiveReport(IEnumerable<string> teamsFullName = null, string reportName = null, string format = "pdf", params FilterDTO[] filters)
         {
-            var result = getReportStream(report, format);
+            if (teamsFullName == null || !teamsFullName.Any())
+                throw new ArgumentNullException(nameof(teamsFullName));
 
-            string fileName = report.ReportName + "." + format;
+            if (teamsFullName == null || !teamsFullName.Any())
+            {
+                teamsFullName = AC.TeamsAllAsync().Result.Select(x => x.FullName);
+            }
 
+            return getReportStream(new CreateReportDTO
+            {
+                EntityId = teamsFullName.ToArray(),
+                OutputFormat = format,
+                ReportName = reportName,
+                TemplateId = (int)TemplateType.Executive,
+                Filters = filters
+            }, format).Stream;
+        }
+
+        #endregion
+
+        #region Filter Helpers
+
+        public FilterDTO GetTimeFrameFilter(DateTime startDateTime) => GetTimeFrameFilter(startDateTime, DateTime.Now);
+
+        public FilterDTO GetTimeFrameFilter(DateTime startDateTime, DateTime endDate)
+        {
+            if (startDateTime > endDate)
+                throw new ArgumentOutOfRangeException("The start date is after the end date");
+
+            return new FilterDTO
+            {
+                Type = (int)FilterType.Timeframe,
+                IncludedValues = new[] { startDateTime.ToString("yyyy-MM-dd"), endDate.ToString("yyyy-MM-dd") }
+            };
+        }
+
+        #endregion
+
+        #region Report Helpers
+
+        public string GetScanReportToFile(long scanId, string reportName,
+            TemplateType scanType = TemplateType.ScanTemplateVulnerabilityTypeOriented,
+            string format = "pdf", params FilterDTO[] filters)
+        {
+            string fileName = reportName + "." + format;
+
+            return SaveReportToFile(
+                GetScanReport(scanId, reportName, format, scanType, filters),
+                fileName);
+        }
+
+        public string SaveReportToFile(Stream result, string fileName)
+        {
             using (FileStream fs = File.Create(fileName))
             {
-                result.Stream.CopyTo(fs);
+                result.CopyTo(fs);
             }
 
             return Path.GetFullPath(fileName);
+        }
+
+
+        public dynamic GetJsonFromReport(Stream stream)
+        {
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
+
+            var serializer = new JsonSerializer();
+
+            using (var sr = new StreamReader(stream))
+            {
+                using (var jsonTextReader = new JsonTextReader(sr))
+                {
+                    return serializer.Deserialize(jsonTextReader);
+                }
+            }
         }
 
         private FileResponse getReportStream(CreateReportDTO report, string format)
@@ -304,5 +338,7 @@ namespace Checkmarx.API.ReportingServices
 
             return ReportingService.ReportsGETAsync(createReport.ReportId).Result;
         }
+
+        #endregion
     }
 }
