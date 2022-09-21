@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Checkmarx.API.ReportingServ
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Checkmarx.API.ReportingServices.Tests", "Checkmarx.API.ReportingServices.Tests\Checkmarx.API.ReportingServices.Tests.csproj", "{8D03187B-E7D4-4992-B567-40A8D21A40D8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utilities", "..\Utilities\Utilities.csproj", "{98377DB6-D8FD-40AD-A0FF-E7F8C39FF819}"
-EndProject
 
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,12 +27,7 @@ Global
 		{8D03187B-E7D4-4992-B567-40A8D21A40D8}.Publish|Any CPU.Build.0 = Release|Any CPU
 		{8D03187B-E7D4-4992-B567-40A8D21A40D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D03187B-E7D4-4992-B567-40A8D21A40D8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{98377DB6-D8FD-40AD-A0FF-E7F8C39FF819}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{98377DB6-D8FD-40AD-A0FF-E7F8C39FF819}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{98377DB6-D8FD-40AD-A0FF-E7F8C39FF819}.Publish|Any CPU.ActiveCfg = Publish|Any CPU
-		{98377DB6-D8FD-40AD-A0FF-E7F8C39FF819}.Publish|Any CPU.Build.0 = Publish|Any CPU
-		{98377DB6-D8FD-40AD-A0FF-E7F8C39FF819}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{98377DB6-D8FD-40AD-A0FF-E7F8C39FF819}.Release|Any CPU.Build.0 = Release|Any CPU
+
 	
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
