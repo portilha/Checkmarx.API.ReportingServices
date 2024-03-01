@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using Utilities;
+
 
 namespace Checkmarx.API.ReportingServices.Tests
 {
@@ -222,7 +222,7 @@ namespace Checkmarx.API.ReportingServices.Tests
 
             File.WriteAllText(file, scansInfo.ToString());
 
-            ProcessUtils.ShowFileInExplorer(file);
+            
         }
 
         [TestMethod]
@@ -254,7 +254,6 @@ namespace Checkmarx.API.ReportingServices.Tests
 
             Trace.WriteLine(file);
 
-            ProcessUtils.ShowFileInExplorer(file);
         }
 
         public StringBuilder GetFixedResultsTest(SAST.Scan scan, Dictionary<long, cxPortalWebService93.CxWSQuery> queries)

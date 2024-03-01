@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Utilities\Utilities.csproj" />
     <ProjectReference Include="..\Checkmarx.API.ReportingServices\Checkmarx.API.ReportingServices.csproj" />
   </ItemGroup>
 
