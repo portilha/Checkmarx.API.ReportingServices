@@ -27,7 +27,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Checkmarx.API.AccessControl" Version="2.1.0" />
+		<PackageReference Include="Checkmarx.API.AccessControl" Version="3.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<None Include="..\README.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
