@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 
 
 namespace Checkmarx.API.ReportingServices.Tests
@@ -336,11 +335,11 @@ namespace Checkmarx.API.ReportingServices.Tests
             return sb;
         }
 
-        private Dictionary<long, Dictionary<long, CxDataRepository.Result>> _resultsCache = new Dictionary<long, Dictionary<long, CxDataRepository.Result>>();
+        private Dictionary<long, Dictionary<long, CxDataRepository97.Result>> _resultsCache = new Dictionary<long, Dictionary<long, CxDataRepository97.Result>>();
 
-        private CxDataRepository.Result GetResult(long hyperlinkScanId, int hyperlinkPathId)
+        private CxDataRepository97.Result GetResult(long hyperlinkScanId, int hyperlinkPathId)
         {
-            Dictionary<long, CxDataRepository.Result> scanResults = null;
+            Dictionary<long, CxDataRepository97.Result> scanResults = null;
             if (!_resultsCache.ContainsKey(hyperlinkScanId))
             {
                 scanResults = _sastClient.GetODataResults(hyperlinkScanId).ToDictionary(x => x.PathId);
